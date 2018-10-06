@@ -1,0 +1,24 @@
+{
+    "games": [
+        {
+            "name": "Wolfenstein II The New Colossus",
+            "path": "Saved Games/MachineGames/Wolfenstein II The New Colossus/base"
+        },
+        {
+            "name": "The Witcher 3",
+            "path": "Documents/The Witcher 3"
+        },
+        {
+            "name": "Skyrim",
+            "path": "Documents/my games/skyrim"
+        },
+        {
+            "name": "Skyrim Special Edition",
+            "path": "Documents/my games/Skyrim Special Edition"
+        },
+        {
+            "name": "Borderlands 2",
+            "path": "Documents/my games/borderlands 2/willowgame/savedata"
+        }
+    ]
+}
