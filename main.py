@@ -12,6 +12,7 @@ import json
 # TODO add creation of log file to allow user to monitor recent active of script
 # TODO clean up imports
 # TODO refactor code
+# TODO test backing up to a NAS
 ###
 
 if __name__ == '__main__':
@@ -23,20 +24,50 @@ if __name__ == '__main__':
     backupVersions = Preferences['NumberOfVersionsToKeep']
     backUpPath = Preferences['BackupDestination']
 
+    Uplay = config['Uplay']
+    UplayUserID = Uplay['UplayUserID']
+    UplayClientLocation = Uplay['UplayClientLocation']
+
+    Steam = config['Steam']
+    options = config.options('Steam')
+    steamAppsLocations = []
+    for opt in options:
+        # TODO Maybe update to use regex
+        if (opt.find('steamapps') != -1):
+            steamAppsLocations.append(Steam[opt][:Steam[opt].find('steamapps')]) if Steam[opt].find('steamapps') > -1 else steamAppsLocations.append(Steam[opt])
+
     with open("games.json", "r") as readFile:
         games = json.load(readFile)
 
     for game in games["games"]:
-        gamePath = join(str(Path.home()), game["path"]).replace("/", "\\")
+        relativeGamePath = game["path"]
+        # TODO Maybe update to use regex
+        if (relativeGamePath.find('Ubisoft Game Launcher') != -1):
+            relativeGamePath = relativeGamePath.replace('<UplayUserID>', UplayUserID)
+            if os.path.exists(join(UplayClientLocation[:UplayClientLocation.find('Ubisoft Game Launcher')], relativeGamePath)):
+                absoluteGamePath = join(UplayClientLocation[:UplayClientLocation.find('Ubisoft Game Launcher')], relativeGamePath).replace("/", "\\")
+
+        elif (relativeGamePath.find('Steam/userdata') != -1):
+            relativeGamePath = relativeGamePath.replace('<SteamUserID>', Steam['SteamUserID'])
+            if os.path.exists(join(Steam['SteamClientLocation'][:Steam['SteamClientLocation'].find('Steam')], relativeGamePath)):
+                absoluteGamePath = join(Steam['SteamClientLocation'][:Steam['SteamClientLocation'].find('Steam')], relativeGamePath).replace("/", "\\")
+
+        elif (relativeGamePath.find('steamapps') != -1):
+            for steamApp in steamAppsLocations:
+                if os.path.exists(join(steamApp, relativeGamePath)):
+                    absoluteGamePath = join(steamApp, game["path"]).replace("/", "\\")
+
+        else:
+            absoluteGamePath = join(str(Path.home()), game["path"]).replace("/", "\\")
         gameName = game["name"]
 
-        print("Current game: {}\nSave path: {}".format(gameName, gamePath))
+        print("Current game: {}\nSave path: {}".format(gameName, absoluteGamePath))
 
         ###
         # Find the last time the game files were modified
         ###
         lastModGame = datetime.datetime(1901, 1, 1, 00, 00, 00, 00)
-        for root, dirs, files in os.walk(gamePath):
+        for root, dirs, files in os.walk(absoluteGamePath):
             for name in files:
                 if (datetime.datetime.fromtimestamp(os.path.getmtime(join(root, name))) > lastModGame):
                     lastModGame = datetime.datetime.fromtimestamp(os.path.getmtime(join(root, name)))
@@ -85,11 +116,11 @@ if __name__ == '__main__':
         # Backup game files
         print("DEBUG: lastModGame: {}, lastModBackup: {}".format(lastModGame, lastModBackup))
         if lastModGame > lastModBackup:
-            print("Starting backup of {} saves.".format(gameName))
+            print("Starting backup of {} saves at {}.".format(gameName, datetime.datetime.now()))
             if not os.path.exists(join(backUpPath, gameName)):
                 os.makedirs(join(backUpPath, gameName))
-            copytree(gamePath, join(backUpPath, gameName, lastModGame.strftime("%Y-%m-%d %H.%M.%S")))
-            print("Completed backup of {} saves.".format(gameName))
+            copytree(absoluteGamePath, join(backUpPath, gameName, lastModGame.strftime("%Y-%m-%d %H.%M.%S")))
+            print("Completed backup of {} saves at {}.".format(gameName, datetime.datetime.now()))
             if backupToDelete.strip():
                 try:
                     print("Removing oldest backup version for {}.".format(gameName))
@@ -98,3 +129,4 @@ if __name__ == '__main__':
                     print("Error: Failed to delete oldest backup {}.".format(backupToDelete))
         else:
             print("No changes to save for {} to backup.".format(gameName))
+    print("GameSaveCopy Completed {}".format(datetime.datetime.now()))
