@@ -1,27 +1,17 @@
-import configparser
-import os
-from os.path import isfile, isdir, join
+from os import walk, listdir, makedirs
+from os.path import join, exists, getmtime, getctime
 from pathlib import Path
-import datetime
+from datetime import datetime
 from shutil import copytree, rmtree
 
 class Game:
     'Game object that represents game save locations.'
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    Uplay = config['Uplay']
-    UplayUserID = Uplay['UplayUserID']
-    UplayClientLocation = Uplay['UplayClientLocation']
+    Uplay = None
+    UplayUserID = None
+    UplayClientLocation = None
 
-    Steam = config['Steam']
-    options = config.options('Steam')
-    steamAppsLocations = []
-
-    for opt in options:
-        # TODO Maybe update to use regex
-        if (opt.find('steamapps') != -1):
-            steamAppsLocations.append(Steam[opt][:Steam[opt].find('steamapps')]) if Steam[opt].find('steamapps') > -1 else steamAppsLocations.append(Steam[opt])
-
+    Steam = None
+    SteamAppsLocations = None
 
     def __init__(self, name, relPath):
         self.name = name
@@ -47,19 +37,19 @@ class Game:
         if (self.isSavedInUplay()):
             self.relativePath = self.relativePath.replace('<UplayUserID>', Game.UplayUserID)
             path = join(Game.UplayClientLocation[:Game.UplayClientLocation.find('Ubisoft Game Launcher')], self.relativePath).replace("/", "\\")
-            if os.path.exists(path):
+            if exists(path):
                 return path
 
         elif (self.isSavedInSteamUserdata()):
             self.relativePath = self.relativePath.replace('<SteamUserID>', Game.Steam['SteamUserID'])
             path = join(Game.Steam['SteamClientLocation'][:Game.Steam['SteamClientLocation'].find('Steam')], self.relativePath).replace("/", "\\")
-            if os.path.exists(path):
+            if exists(path):
                 return path
 
         elif (self.isSavedInSteamApps()):
-            for steamApp in Game.steamAppsLocations:
+            for steamApp in Game.SteamAppsLocations:
                 path = join(steamApp, self.relativePath).replace("/", "\\")
-                if os.path.exists(path):
+                if exists(path):
                     return path
         else:
             return join(str(Path.home()), self.relativePath).replace("/", "\\")
@@ -68,36 +58,36 @@ class Game:
 
 
     def getModificationDate(self, folderToSearch):
-        mostRecentModification = datetime.datetime(1901, 1, 1, 00, 00, 00, 00)
+        mostRecentModification = datetime(1901, 1, 1, 00, 00, 00, 00)
         errors = []
-        for root, dirs, files in os.walk(folderToSearch, onerror=errors.append):
+        for root, dirs, files in walk(folderToSearch, onerror=errors.append):
             for name in files:
-                if (datetime.datetime.fromtimestamp(os.path.getmtime(join(root, name))) > mostRecentModification):
-                    mostRecentModification = datetime.datetime.fromtimestamp(os.path.getmtime(join(root, name)))
+                if (datetime.fromtimestamp(getmtime(join(root, name))) > mostRecentModification):
+                    mostRecentModification = datetime.fromtimestamp(getmtime(join(root, name)))
             for name in dirs:
-                if (datetime.datetime.fromtimestamp(os.path.getmtime(join(root, name))) > mostRecentModification):
-                    mostRecentModification = datetime.datetime.fromtimestamp(os.path.getmtime(join(root, name)))
+                if (datetime.fromtimestamp(getmtime(join(root, name))) > mostRecentModification):
+                    mostRecentModification = datetime.fromtimestamp(getmtime(join(root, name)))
         return mostRecentModification
 
 
     def countBackups(self, backupLocation):
         try:
-            return int(len(os.listdir(join(backupLocation, self.name))))
+            return int(len(listdir(join(backupLocation, self.name))))
         except:
             print('There are no backups for {} to count.'.format(self.name))
 
 
     def getBackupToDelete(self, backupLocation):
-        oldestCreatedBackup = datetime.datetime.today()
+        oldestCreatedBackup = datetime.today()
         backupToDelete = ""
 
         try:
             # TODO same code as mostRecentBackupPath method look to merge same code into own function
-            backupDirectories = os.listdir(join(backupLocation, self.name))
+            backupDirectories = listdir(join(backupLocation, self.name))
 
             for backup in backupDirectories:
                 backupFolderPath = join(backupLocation, self.name, backup)
-                if (datetime.datetime.fromtimestamp(os.path.getctime(backupFolderPath)) < oldestCreatedBackup):
+                if (datetime.fromtimestamp(getctime(backupFolderPath)) < oldestCreatedBackup):
                     backupToDelete = backupFolderPath
             return backupToDelete
         except:
@@ -105,15 +95,15 @@ class Game:
 
 
     def mostRecentBackupPath(self, backupLocation):
-        lastCreatedBackupDate = datetime.datetime(1901, 1, 1, 00, 00, 00, 00)
+        lastCreatedBackupDate = datetime(1901, 1, 1, 00, 00, 00, 00)
         lastCreatedBackup = ""
 
         try:
-            backupDirectories = os.listdir(join(backupLocation, self.name))
+            backupDirectories = listdir(join(backupLocation, self.name))
 
             for backup in backupDirectories:
                 backupFolderPath = join(backupLocation, self.name, backup)
-                if (datetime.datetime.fromtimestamp(os.path.getctime(backupFolderPath)) > lastCreatedBackupDate):
+                if (datetime.fromtimestamp(getctime(backupFolderPath)) > lastCreatedBackupDate):
                     lastCreatedBackup = backupFolderPath
 
             return self.getModificationDate(lastCreatedBackup)
@@ -131,14 +121,14 @@ class Game:
 
 
     def backup(self, backupLocation):
-        print("Starting backup of {} saves at {}.".format(self.name, datetime.datetime.now()))
+        print("Starting backup of {} saves at {}.".format(self.name, datetime.now()))
         backupPath = join(backupLocation, self.name)
         saveAbsolutePath = self.buildAbsoluteFilePath()
         backupName = self.getModificationDate(saveAbsolutePath).strftime("%Y-%m-%d %H.%M.%S")
-        if not os.path.exists(backupPath):
-            os.makedirs(backupPath)
+        if not exists(backupPath):
+            makedirs(backupPath)
         copytree(saveAbsolutePath, join(backupPath, backupName))
-        print("Completed backup of {} saves at {}.".format(self.name, datetime.datetime.now()))
+        print("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
 
 
     def __str__(self):
