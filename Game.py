@@ -3,6 +3,7 @@ from os.path import join, exists, getmtime, getctime
 from pathlib import Path
 from datetime import datetime
 from shutil import copytree, rmtree
+import logging
 
 class Game:
     'Game object that represents game save locations.'
@@ -74,7 +75,7 @@ class Game:
         try:
             return int(len(listdir(join(backupLocation, self.name))))
         except:
-            print('There are no backups for {} to count.'.format(self.name))
+            logging.info('There are no backups for {} to count.'.format(self.name))
 
 
     def getBackupToDelete(self, backupLocation):
@@ -91,7 +92,7 @@ class Game:
                     backupToDelete = backupFolderPath
             return backupToDelete
         except:
-            print('There are no backups for {} to delete.'.format(self.name))
+            logging.info('There are no backups for {} to delete.'.format(self.name))
 
 
     def mostRecentBackupPath(self, backupLocation):
@@ -108,27 +109,27 @@ class Game:
 
             return self.getModificationDate(lastCreatedBackup)
         except:
-            print('Backups for {} do not exist, a new directory will be created.'.format(self.name))
+            logging.info('Backups for {} do not exist, a new directory will be created.'.format(self.name))
 
 
     def cleanOldBackups(self, backupLocation, backupVersionCount):
         if self.countBackups(backupLocation) > int(backupVersionCount):
             try:
-                print("Removing oldest backup version for {}.".format(self.name))
+                logging.info("Removing oldest backup version for {}.".format(self.name))
                 rmtree(self.getBackupToDelete(backupLocation))
             except:
-                print("Error: Failed to delete oldest backup {}.".format(self.getBackupToDelete(backupLocation)))
+                logging.warning("Error: Failed to delete oldest backup {}.".format(self.getBackupToDelete(backupLocation)))
 
 
     def backup(self, backupLocation):
-        print("Starting backup of {} saves at {}.".format(self.name, datetime.now()))
+        logging.info("Starting backup of {} saves at {}.".format(self.name, datetime.now()))
         backupPath = join(backupLocation, self.name)
         saveAbsolutePath = self.buildAbsoluteFilePath()
         backupName = self.getModificationDate(saveAbsolutePath).strftime("%Y-%m-%d %H.%M.%S")
         if not exists(backupPath):
             makedirs(backupPath)
         copytree(saveAbsolutePath, join(backupPath, backupName))
-        print("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
+        logging.info("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
 
 
     def __str__(self):

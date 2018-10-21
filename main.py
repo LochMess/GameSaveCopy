@@ -1,28 +1,49 @@
 from datetime import datetime
 import configparser
 import json
+import logging
 from Game import Game
+
+# Imports for log clean up
+from os import remove, listdir, path, makedirs
+from os.path import realpath, join, exists
 
 ###
 # TODO add support for games that do not store saves within user directory
-# TODO add creation of log file to allow user to monitor recent active of script
-# https://docs.python.org/2/howto/logging.html
-# https://docs.python.org/3/howto/logging-cookbook.html
-# TODO clean up imports
+# TODO Make log clean up cleaner... seperate class?
 # TODO refactor code
 # TODO test backing up to a NAS
 # TODO look at compressing backups maybe not the current one just the previous versions?
 # https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
+# TODO allow the games.json file to contain absolute file paths
 ###
 
+def deleteOldLogs(numberOfLogsToKeep, logsPath):
+    logFiles = listdir(logsPath)
+    if len(logFiles) > numberOfLogsToKeep:
+        logging.info("Removing old log files.")
+        for file in logFiles[:-numberOfLogsToKeep]:
+            remove(join(logsPath, file))
+
 if __name__ == '__main__':
-    print("GameSaveCopy Started {}".format(datetime.now()))
+    logsPath = realpath(__file__)[:realpath(__file__).rfind('\\')] + '\\logs\\'
+    if not exists(logsPath):
+        makedirs(logsPath)
+    
+    logging.basicConfig(
+        filename = 'logs/GameSaveCopy {}.log'.format(datetime.now().strftime("%Y-%m-%d %H.%M.%S")),
+        format = '%(levelname)s: %(message)s',
+        filemode = 'w',
+        level = logging.INFO
+    )
+    logging.info("GameSaveCopy Started {}".format(datetime.now()))
 
     config = configparser.ConfigParser()
     config.read('config.ini')
     Preferences = config['Preferences']
     backupVersions = Preferences['NumberOfVersionsToKeep']
     backUpPath = Preferences['BackupDestination']
+    logsToKeep = int(Preferences['LogsToKeep'])
 
     Game.Uplay = config['Uplay']
     Game.UplayUserID = Game.Uplay['UplayUserID']
@@ -39,8 +60,6 @@ if __name__ == '__main__':
 
     Game.SteamAppsLocations = steamAppsLocations
 
-    print('Type config: {}, preferences: {}'.format(type(config), type(Preferences)))
-
     with open("games.json", "r") as readFile:
         games = json.load(readFile)
 
@@ -48,14 +67,12 @@ if __name__ == '__main__':
 
         gameObj = Game(game["name"], game["path"])
 
-        # print("Game backup modification time: {}".format(gameObj.getModificationDate(gameObj.mostRecentBackupPath(backUpPath))))
-        # print('abso path: {}, most recent path: {}'.format(gameObj.buildAbsoluteFilePath(), gameObj.mostRecentBackupPath(backUpPath)))
         if not gameObj.mostRecentBackupPath(backUpPath) or gameObj.getModificationDate(gameObj.buildAbsoluteFilePath()) > gameObj.mostRecentBackupPath(backUpPath):
             gameObj.backup(backUpPath)
             gameObj.cleanOldBackups(backUpPath, backupVersions)
         else:
-            print("No changes to save for {} to backup.".format(gameObj.name))
+            logging.info("No changes to save for {} to backup.".format(gameObj.name))
 
-        # print('gameObj: {}, steamapps: {}, uplay: {}, steam userdata: {}, gameOBj absolute path: {}'.format(gameObj, gameObj.isSavedInSteamApps(), gameObj.isSavedInUplay(), gameObj.isSavedInSteamUserdata(), gameObj.buildAbsoluteFilePath()))
+    deleteOldLogs(logsToKeep, logsPath)
 
-    print("GameSaveCopy Completed {}".format(datetime.now()))
+    logging.info("GameSaveCopy Completed {}".format(datetime.now()))
