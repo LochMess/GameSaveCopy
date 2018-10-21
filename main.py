@@ -4,19 +4,25 @@ import json
 import logging
 from Game import Game
 
-# Imports for log clean up
+# Imports for logs clean up
 from os import remove, listdir, path, makedirs
 from os.path import realpath, join, exists
 
 ###
-# TODO add support for games that do not store saves within user directory
-# TODO Make log clean up cleaner... seperate class?
+# TODO Make logging cleaner... seperate class?
 # TODO refactor code
-# TODO test backing up to a NAS
 # TODO look at compressing backups maybe not the current one just the previous versions?
 # https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
+# potential issue with compression, making new zip files means new creation times for the files, solution compress oldest first
 # TODO allow the games.json file to contain absolute file paths
 ###
+def configureLogging():
+    logging.basicConfig(
+        filename = 'logs/GameSaveCopy {}.log'.format(datetime.now().strftime("%Y-%m-%d %H.%M.%S")),
+        format = '%(levelname)s: %(message)s',
+        filemode = 'w',
+        level = logging.INFO
+    )
 
 def deleteOldLogs(numberOfLogsToKeep, logsPath):
     logFiles = listdir(logsPath)
@@ -29,13 +35,9 @@ if __name__ == '__main__':
     logsPath = realpath(__file__)[:realpath(__file__).rfind('\\')] + '\\logs\\'
     if not exists(logsPath):
         makedirs(logsPath)
-    
-    logging.basicConfig(
-        filename = 'logs/GameSaveCopy {}.log'.format(datetime.now().strftime("%Y-%m-%d %H.%M.%S")),
-        format = '%(levelname)s: %(message)s',
-        filemode = 'w',
-        level = logging.INFO
-    )
+
+    configureLogging()
+
     logging.info("GameSaveCopy Started {}".format(datetime.now()))
 
     config = configparser.ConfigParser()
