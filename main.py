@@ -45,6 +45,8 @@ if __name__ == '__main__':
 
     logsToKeep = int(Preferences['LogsToKeep'])
 
+    compress = Preferences['Compress']
+
     Game.Uplay = config['Uplay']
     Game.UplayUserID = Game.Uplay['UplayUserID']
     Game.UplayClientLocation = Game.Uplay['UplayClientLocation']
@@ -74,7 +76,8 @@ if __name__ == '__main__':
         else:
             logging.info("No changes to save for {} to backup.".format(gameObj.name))
 
-        gameObj.compress(backUpPath)
+        if compress.lower().find('true') or compress.lower().find('yes'):
+            gameObj.compress(backUpPath)
 
     deleteOldLogs(logsToKeep, logsPath)
 
