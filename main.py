@@ -11,9 +11,6 @@ from os.path import realpath, join, exists
 ###
 # TODO Make logging cleaner... seperate class?
 # TODO refactor code
-# TODO look at compressing backups maybe not the current one just the previous versions?
-# https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
-# potential issue with compression, making new zip files means new creation times for the files, solution compress oldest first
 # TODO allow the games.json file to contain absolute file paths
 ###
 def configureLogging():
@@ -45,6 +42,7 @@ if __name__ == '__main__':
     Preferences = config['Preferences']
     backupVersions = Preferences['NumberOfVersionsToKeep']
     backUpPath = Preferences['BackupDestination']
+    print('{} {}'.format(1, backUpPath))
     logsToKeep = int(Preferences['LogsToKeep'])
 
     Game.Uplay = config['Uplay']
@@ -62,18 +60,23 @@ if __name__ == '__main__':
 
     Game.SteamAppsLocations = steamAppsLocations
 
+    print('{} {}'.format(2, backUpPath))
+
     with open("games.json", "r") as readFile:
         games = json.load(readFile)
 
     for game in games["games"]:
 
         gameObj = Game(game["name"], game["path"])
-
+        print('{} {}'.format(3, backUpPath))
         if not gameObj.mostRecentBackupPath(backUpPath) or gameObj.getModificationDate(gameObj.buildAbsoluteFilePath()) > gameObj.mostRecentBackupPath(backUpPath):
             gameObj.backup(backUpPath)
             gameObj.cleanOldBackups(backUpPath, backupVersions)
         else:
             logging.info("No changes to save for {} to backup.".format(gameObj.name))
+
+        print('{} {}'.format(4, backUpPath))
+        gameObj.compress(backUpPath)
 
     deleteOldLogs(logsToKeep, logsPath)
 

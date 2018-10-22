@@ -2,7 +2,7 @@ from os import walk, listdir, makedirs
 from os.path import join, exists, getmtime, getctime
 from pathlib import Path
 from datetime import datetime
-from shutil import copytree, rmtree
+from shutil import copytree, rmtree, make_archive
 import logging
 
 class Game:
@@ -131,6 +131,15 @@ class Game:
         copytree(saveAbsolutePath, join(backupPath, backupName))
         logging.info("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
 
+    def compress(self, backupLocation):
+        logging.info("Compressing previous backups.")
+        backupPath = join(backupLocation, self.name)
+        backups = list(filter(lambda file: file.find('.zip') == -1, listdir(backupPath)))
+        for backup in backups[:-1]:
+            currentBackupPath = join(backupPath, backup)
+            make_archive(currentBackupPath, 'zip', currentBackupPath)
+            logging.info("Removing uncompressed previous backup {}.".format(backup))
+            rmtree(currentBackupPath)
 
     def __str__(self):
         return 'name: {}\nrelative file path: {}'.format(self.name, self.relativePath)
