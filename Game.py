@@ -1,4 +1,4 @@
-from os import walk, listdir, makedirs
+from os import walk, listdir, makedirs, remove
 from os.path import join, exists, getmtime, getctime
 from pathlib import Path
 from datetime import datetime
@@ -116,7 +116,11 @@ class Game:
         if self.countBackups(backupLocation) > int(backupVersionCount):
             try:
                 logging.info("Removing oldest backup version for {}.".format(self.name))
-                rmtree(self.getBackupToDelete(backupLocation))
+                versionToDelete = self.getBackupToDelete(backupLocation)
+                if versionToDelete.find('.zip'):
+                    remove(versionToDelete)
+                else:
+                    rmtree(versionToDelete)
             except:
                 logging.warning("Error: Failed to delete oldest backup {}.".format(self.getBackupToDelete(backupLocation)))
 
@@ -132,14 +136,15 @@ class Game:
         logging.info("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
 
     def compress(self, backupLocation):
-        logging.info("Compressing previous backups.")
         backupPath = join(backupLocation, self.name)
         backups = list(filter(lambda file: file.find('.zip') == -1, listdir(backupPath)))
-        for backup in backups[:-1]:
-            currentBackupPath = join(backupPath, backup)
-            make_archive(currentBackupPath, 'zip', currentBackupPath)
-            logging.info("Removing uncompressed previous backup {}.".format(backup))
-            rmtree(currentBackupPath)
+        if len(backups) > 1:
+            logging.info("Compressing previous backups.")
+            for backup in backups[:-1]:
+                currentBackupPath = join(backupPath, backup)
+                make_archive(currentBackupPath, 'zip', currentBackupPath)
+                logging.info("Removing uncompressed previous backup {}.".format(backup))
+                rmtree(currentBackupPath)
 
     def __str__(self):
         return 'name: {}\nrelative file path: {}'.format(self.name, self.relativePath)
