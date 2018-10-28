@@ -1,6 +1,10 @@
 {
     "games": [
         {
+            "name": "Alpha Protocol",
+            "path": "Documents/Alpha Protocol"
+        },
+        {
             "name": "Mafia 3",
             "path": "AppData/Local/2K Games/Mafia III"
         },

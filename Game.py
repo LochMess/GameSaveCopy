@@ -18,6 +18,8 @@ class Game:
     def __init__(self, name, relPath):
         self.name = name
         self.relativePath = relPath.replace("/", "\\")
+        self.absolutePath = self.buildAbsoluteFilePath()
+        self.installed = True if self.absolutePath else False
 
     def isCompleteFilePath(self):
         return True if re.search('[A-Z]:{1}', self.relativePath) else False
@@ -58,8 +60,8 @@ class Game:
                     return path
         else:
             return join(str(Path.home()), self.relativePath).replace("/", "\\")
-
-        return '{} skipped game not installed.'.format(self.name)
+        logging.info('{} skipped game not installed.'.format(self.name))
+        return None
 
 
     def getModificationDate(self, folderToSearch):
@@ -129,14 +131,15 @@ class Game:
 
 
     def backup(self, backupLocation):
-        logging.info("Starting backup of {} saves at {}.".format(self.name, datetime.now()))
-        backupPath = join(backupLocation, self.name)
-        saveAbsolutePath = self.buildAbsoluteFilePath()
-        backupName = self.getModificationDate(saveAbsolutePath).strftime("%Y-%m-%d %H.%M.%S")
-        if not exists(backupPath):
-            makedirs(backupPath)
-        copytree(saveAbsolutePath, join(backupPath, backupName))
-        logging.info("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
+        if self.installed:
+            logging.info("Starting backup of {} saves at {}.".format(self.name, datetime.now()))
+            backupPath = join(backupLocation, self.name)
+            # saveAbsolutePath = self.buildAbsoluteFilePath()
+            backupName = self.getModificationDate(self.absolutePath).strftime("%Y-%m-%d %H.%M.%S")
+            if not exists(backupPath):
+                makedirs(backupPath)
+            copytree(self.absolutePath, join(backupPath, backupName))
+            logging.info("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
 
     def compress(self, backupLocation):
         backupPath = join(backupLocation, self.name)

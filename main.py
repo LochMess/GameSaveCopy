@@ -65,14 +65,15 @@ if __name__ == '__main__':
 
         gameObj = Game(game["name"], game["path"])
 
-        if not gameObj.mostRecentBackupPath(backUpPath) or gameObj.getModificationDate(gameObj.buildAbsoluteFilePath()) > gameObj.mostRecentBackupPath(backUpPath):
-            gameObj.backup(backUpPath)
-            gameObj.cleanOldBackups(backUpPath, backupVersions)
-        else:
-            logging.info("No changes to save for {} to backup.".format(gameObj.name))
+        if gameObj.installed:
+            if not gameObj.mostRecentBackupPath(backUpPath) or gameObj.getModificationDate(gameObj.absolutePath) > gameObj.mostRecentBackupPath(backUpPath):
+                gameObj.backup(backUpPath)
+                gameObj.cleanOldBackups(backUpPath, backupVersions)
+            else:
+                logging.info("No changes to save for {} to backup.".format(gameObj.name))
 
-        if compress.lower().find('true') or compress.lower().find('yes'):
-            gameObj.compress(backUpPath)
+            if compress.lower().find('true') or compress.lower().find('yes'):
+                gameObj.compress(backUpPath)
 
     deleteOldLogs(logsToKeep, logsPath)
 
