@@ -131,15 +131,13 @@ class Game:
 
 
     def backup(self, backupLocation):
-        if self.installed:
-            logging.info("Starting backup of {} saves at {}.".format(self.name, datetime.now()))
-            backupPath = join(backupLocation, self.name)
-            # saveAbsolutePath = self.buildAbsoluteFilePath()
-            backupName = self.getModificationDate(self.absolutePath).strftime("%Y-%m-%d %H.%M.%S")
-            if not exists(backupPath):
-                makedirs(backupPath)
-            copytree(self.absolutePath, join(backupPath, backupName))
-            logging.info("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
+        logging.info("Starting backup of {} saves at {}.".format(self.name, datetime.now()))
+        backupPath = join(backupLocation, self.name)
+        backupName = self.getModificationDate(self.absolutePath).strftime("%Y-%m-%d %H.%M.%S")
+        if not exists(backupPath):
+            makedirs(backupPath)
+        copytree(self.absolutePath, join(backupPath, backupName))
+        logging.info("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
 
     def compress(self, backupLocation):
         backupPath = join(backupLocation, self.name)
