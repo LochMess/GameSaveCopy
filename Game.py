@@ -59,7 +59,9 @@ class Game:
                 if exists(path):
                     return path
         else:
-            return join(str(Path.home()), self.relativePath).replace("/", "\\")
+            path = join(str(Path.home()), self.relativePath).replace("/", "\\")
+            if exists(path):
+                return path
         logging.info('{} skipped game not installed.'.format(self.name))
         return None
 
