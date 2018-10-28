@@ -1,6 +1,10 @@
 {
     "games": [
         {
+            "name": "Mafia 3",
+            "path": "AppData/Local/2K Games/Mafia III"
+        },
+        {
             "name": "Fallout 4",
             "path": "Documents/my games/Fallout4"
         },
