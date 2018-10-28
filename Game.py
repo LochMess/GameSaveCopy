@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 from shutil import copytree, rmtree, make_archive
 import logging
+import re
 
 class Game:
     'Game object that represents game save locations.'
@@ -17,8 +18,9 @@ class Game:
     def __init__(self, name, relPath):
         self.name = name
         self.relativePath = relPath.replace("/", "\\")
-        # TODO maybe have setter property for path and read path and generate absolute path on instantiation of the object
 
+    def isCompleteFilePath(self):
+        return True if re.search('[A-Z]:{1}', self.relativePath) else False
 
     def isSavedInSteamApps(self):
         return True if self.relativePath.find('steamapps') != -1 else False
@@ -29,12 +31,14 @@ class Game:
 
 
     def isSavedInSteamUserdata(self):
-        # TODO update to use regex or something to be more robust at handling foward/back slashes
         return True if self.relativePath.find('Steam/userdata') != -1 or self.relativePath.find('Steam\\userdata') != -1 else False
 
 
-# TODO determine what logic to have in game and whether it should read the config file or have all it's info passed from the main file.
     def buildAbsoluteFilePath(self):
+        if (self.isCompleteFilePath()):
+            path = self.relativePath.replace("/", "\\")
+            if exists(path):
+                return path
         if (self.isSavedInUplay()):
             self.relativePath = self.relativePath.replace('<UplayUserID>', Game.UplayUserID)
             path = join(Game.UplayClientLocation[:Game.UplayClientLocation.find('Ubisoft Game Launcher')], self.relativePath).replace("/", "\\")
@@ -83,7 +87,6 @@ class Game:
         backupToDelete = ""
 
         try:
-            # TODO same code as mostRecentBackupPath method look to merge same code into own function
             backupDirectories = listdir(join(backupLocation, self.name))
 
             for backup in backupDirectories:

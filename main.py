@@ -8,14 +8,10 @@ from Game import Game
 from os import remove, listdir, path, makedirs
 from os.path import realpath, join, exists
 
-###
-# TODO Make logging cleaner... seperate class?
-# TODO refactor code
-# TODO allow the games.json file to contain absolute file paths
-###
-def configureLogging():
+
+def configureLogging(logsPath):
     logging.basicConfig(
-        filename = 'logs/GameSaveCopy {}.log'.format(datetime.now().strftime("%Y-%m-%d %H.%M.%S")),
+        filename = join(logsPath, 'GameSaveCopy {}.log'.format(datetime.now().strftime("%Y-%m-%d %H.%M.%S"))),
         format = '%(levelname)s: %(message)s',
         filemode = 'w',
         level = logging.INFO
@@ -33,7 +29,7 @@ if __name__ == '__main__':
     if not exists(logsPath):
         makedirs(logsPath)
 
-    configureLogging()
+    configureLogging(logsPath)
 
     logging.info("GameSaveCopy Started {}".format(datetime.now()))
 
@@ -56,7 +52,6 @@ if __name__ == '__main__':
     steamAppsLocations = []
 
     for opt in options:
-        # TODO Maybe update to use regex
         if (opt.find('steamapps') != -1):
             steamAppsLocations.append(Game.Steam[opt][:Game.Steam[opt].find('steamapps')]) if Game.Steam[opt].find('steamapps') > -1 else steamAppsLocations.append(Game.Steam[opt])
 
