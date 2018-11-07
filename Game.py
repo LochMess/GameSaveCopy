@@ -95,8 +95,12 @@ class Game:
 
             for backup in backupDirectories:
                 backupFolderPath = join(backupLocation, self.name, backup)
-                if (datetime.fromtimestamp(getctime(backupFolderPath)) < oldestCreatedBackup):
+                backupModificationTime = datetime.fromtimestamp(getmtime(backupFolderPath))
+
+                if (backupModificationTime < oldestCreatedBackup):
                     backupToDelete = backupFolderPath
+                    oldestCreatedBackup = backupModificationTime
+
             return backupToDelete
         except:
             logging.info('There are no backups for {} to delete.'.format(self.name))
@@ -111,8 +115,11 @@ class Game:
 
             for backup in backupDirectories:
                 backupFolderPath = join(backupLocation, self.name, backup)
-                if (datetime.fromtimestamp(getctime(backupFolderPath)) > lastCreatedBackupDate):
+                backupModificationTime = datetime.fromtimestamp(getmtime(backupFolderPath))
+
+                if (backupModificationTime > lastCreatedBackupDate):
                     lastCreatedBackup = backupFolderPath
+                    lastCreatedBackupDate = backupModificationTime
 
             return self.getModificationDate(lastCreatedBackup)
         except:
@@ -124,6 +131,7 @@ class Game:
             try:
                 logging.info("Removing oldest backup version for {}.".format(self.name))
                 versionToDelete = self.getBackupToDelete(backupLocation)
+
                 if versionToDelete.find('.zip'):
                     remove(versionToDelete)
                 else:
