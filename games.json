@@ -1,6 +1,42 @@
 {
     "games": [
         {
+            "name": "Tomb Raider 2013",
+            "path": "Steam/userdata/<SteamUserID>/203160"
+        },
+        {
+            "name": "Rise of the Tomb Raider",
+            "path": "Steam/userdata/<SteamUserID>/391220"
+        },
+        {
+            "name": "Middle-earth Shadow of Mordor",
+            "path": "Steam/userdata/<SteamUserID>/241930"
+        },
+        {
+            "name": "FTL Faster Than Light",
+            "path": "Documents/my games/FasterThanLight"
+        },
+        {
+            "name": "Cities Skylines",
+            "path": "AppData/Local/Colossal Order/Cities_Skylines"
+        },
+        {
+            "name": "DOOM 2016",
+            "path": "Saved Games/id Software/DOOM/base"
+        },
+        {
+            "name": "The Witcher 2 Assassins of Kings Steam Cloud Saves",
+            "path": "Steam/userdata/<SteamUserID>/20920/remote"
+        },
+        {
+            "name": "The Witcher 2 Assassins of Kings",
+            "path": "Documents/Witcher 2/gamesaves"
+        },
+        {
+            "name": "The Witcher",
+            "path": "Documents/The Witcher"
+        },
+        {
             "name": "Alpha Protocol",
             "path": "Documents/Alpha Protocol"
         },
