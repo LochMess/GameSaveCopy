@@ -69,10 +69,6 @@ if __name__ == '__main__':
 
         if gameObj.installed:
 
-            gameHasNoBackups = gameObj.hasNoBackups(backUpPath)
-
-            gameHasCurrentBackups = gameObj.currentSaveBackedUp(backUpPath)
-
             if gameObj.hasNoBackups(backUpPath) or not gameObj.currentSaveBackedUp(backUpPath):
                 gameObj.backup(backUpPath)
                 gameObj.cleanOldBackups(backUpPath, backupVersions)
