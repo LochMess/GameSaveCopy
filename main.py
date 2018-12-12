@@ -4,7 +4,6 @@ import json
 import logging
 from Game import Game
 
-# Imports for logs clean up
 from os import remove, listdir, path, makedirs
 from os.path import realpath, join, exists
 
@@ -66,7 +65,12 @@ if __name__ == '__main__':
         gameObj = Game(game["name"], game["path"])
 
         if gameObj.installed:
-            if not gameObj.mostRecentBackupPath(backUpPath) or gameObj.getModificationDate(gameObj.absolutePath) > gameObj.mostRecentBackupPath(backUpPath):
+           
+            gameHasNoBackups = gameObj.hasNoBackups(backUpPath) 
+
+            gameHasCurrentBackups = gameObj.currentSaveBackedUp(backUpPath)
+
+            if gameObj.hasNoBackups(backUpPath) or not gameObj.currentSaveBackedUp(backUpPath):
                 gameObj.backup(backUpPath)
                 gameObj.cleanOldBackups(backUpPath, backupVersions)
             else:

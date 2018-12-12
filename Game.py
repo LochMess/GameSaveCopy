@@ -19,7 +19,7 @@ class Game:
         self.name = name
         self.relativePath = relPath.replace("/", "\\")
         self.absolutePath = self.buildAbsoluteFilePath()
-        self.installed = True if self.absolutePath else False
+        self.installed = True if self.absolutePath and listdir(self.absolutePath) else False
 
     def isCompleteFilePath(self):
         return True if re.search('[A-Z]:{1}', self.relativePath) else False
@@ -65,18 +65,35 @@ class Game:
         logging.info('{} skipped game not installed.'.format(self.name))
         return None
 
+    def hasNoBackups(self, backupLocation):
+        mostRecentBackup = self.mostRecentBackupPath(backupLocation)
+        modDateMostRecent = self.getModificationDate(join(backupLocation, self.name, mostRecentBackup))
+        if not modDateMostRecent:
+            return True
+        return False
 
+    def currentSaveBackedUp(self, backupPath):
+        currentSave = self.getModificationDate(self.absolutePath)
+        latestBackup = self.getModificationDate(join(backupPath, self.name, self.mostRecentBackupPath(backupPath)))
+        if not currentSave or currentSave == latestBackup:
+            return True
+        return False
+
+# TODO add compatibility for zip files?
     def getModificationDate(self, folderToSearch):
+        if (folderToSearch == ""):
+            return None
         mostRecentModification = datetime(1901, 1, 1, 00, 00, 00, 00)
         errors = []
         for root, dirs, files in walk(folderToSearch, onerror=errors.append):
+
             for name in files:
                 if (datetime.fromtimestamp(getmtime(join(root, name))) > mostRecentModification):
                     mostRecentModification = datetime.fromtimestamp(getmtime(join(root, name)))
             for name in dirs:
                 if (datetime.fromtimestamp(getmtime(join(root, name))) > mostRecentModification):
                     mostRecentModification = datetime.fromtimestamp(getmtime(join(root, name)))
-        return mostRecentModification
+        return mostRecentModification if not errors else None 
 
 
     def countBackups(self, backupLocation):
@@ -105,25 +122,35 @@ class Game:
         except:
             logging.info('There are no backups for {} to delete.'.format(self.name))
 
+# TODO shouldn't be a function on the game object
+    def stripZipExtensionFromString(self, fileName):
+        return fileName[:fileName.find('.zip')]
+
+# TODO shouldn't be a function on the game object
+    def isZipFile(self, fileName):
+        return fileName.find('.zip') != -1
 
     def mostRecentBackupPath(self, backupLocation):
-        lastCreatedBackupDate = datetime(1901, 1, 1, 00, 00, 00, 00)
-        lastCreatedBackup = ""
+        dateCursor = datetime(1901, 1, 1, 00, 00, 00, 00)
+        mostRecentBackup = ""
 
         try:
-            backupDirectories = listdir(join(backupLocation, self.name))
+            for file in listdir(join(backupLocation, self.name)):
+                dateString = file
+                if (self.isZipFile(file)):
+                    dateString = self.stripZipExtensionFromString(file)
+                try:
+                    dateFromString = datetime.strptime(dateString, "%Y-%m-%d %H.%M.%S")
+                    if (dateFromString > dateCursor):
+                        mostRecentBackup = file
+                        dateCursor = dateFromString
+                except:
+                    logging.info("Filename '{}' is not a date matching the expected format.".format(file))
 
-            for backup in backupDirectories:
-                backupFolderPath = join(backupLocation, self.name, backup)
-                backupModificationTime = datetime.fromtimestamp(getmtime(backupFolderPath))
-
-                if (backupModificationTime > lastCreatedBackupDate):
-                    lastCreatedBackup = backupFolderPath
-                    lastCreatedBackupDate = backupModificationTime
-
-            return self.getModificationDate(lastCreatedBackup)
+            return mostRecentBackup
         except:
             logging.info('Backups for {} do not exist, a new directory will be created.'.format(self.name))
+            return ""
 
 
     def cleanOldBackups(self, backupLocation, backupVersionCount):
