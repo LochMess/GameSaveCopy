@@ -10,11 +10,13 @@ from os.path import realpath, join, exists
 
 def configureLogging(logsPath):
     logging.basicConfig(
-        filename = join(logsPath, 'GameSaveCopy {}.log'.format(datetime.now().strftime("%Y-%m-%d %H.%M.%S"))),
-        format = '%(levelname)s: %(message)s',
-        filemode = 'w',
-        level = logging.INFO
+        filename=join(logsPath, 'GameSaveCopy {}.log'.format(
+            datetime.now().strftime("%Y-%m-%d %H.%M.%S"))),
+        format='%(levelname)s: %(message)s',
+        filemode='w',
+        level=logging.INFO
     )
+
 
 def deleteOldLogs(numberOfLogsToKeep, logsPath):
     logFiles = listdir(logsPath)
@@ -22,6 +24,7 @@ def deleteOldLogs(numberOfLogsToKeep, logsPath):
         logging.info("Removing old log files.")
         for file in logFiles[:-numberOfLogsToKeep]:
             remove(join(logsPath, file))
+
 
 if __name__ == '__main__':
     logsPath = realpath(__file__)[:realpath(__file__).rfind('\\')] + '\\logs\\'
@@ -52,10 +55,10 @@ if __name__ == '__main__':
 
     for opt in options:
         if (opt.find('steamapps') != -1):
-            steamAppsLocations.append(Game.Steam[opt][:Game.Steam[opt].find('steamapps')]) if Game.Steam[opt].find('steamapps') > -1 else steamAppsLocations.append(Game.Steam[opt])
+            steamAppsLocations.append(Game.Steam[opt][:Game.Steam[opt].find('steamapps')]) if Game.Steam[opt].find(
+                'steamapps') > -1 else steamAppsLocations.append(Game.Steam[opt])
 
     Game.SteamAppsLocations = steamAppsLocations
-
 
     with open("games.json", "r") as readFile:
         games = json.load(readFile)
@@ -65,8 +68,8 @@ if __name__ == '__main__':
         gameObj = Game(game["name"], game["path"])
 
         if gameObj.installed:
-           
-            gameHasNoBackups = gameObj.hasNoBackups(backUpPath) 
+
+            gameHasNoBackups = gameObj.hasNoBackups(backUpPath)
 
             gameHasCurrentBackups = gameObj.currentSaveBackedUp(backUpPath)
 
@@ -74,7 +77,8 @@ if __name__ == '__main__':
                 gameObj.backup(backUpPath)
                 gameObj.cleanOldBackups(backUpPath, backupVersions)
             else:
-                logging.info("No changes to save for {} to backup.".format(gameObj.name))
+                logging.info(
+                    "No changes to save for {} to backup.".format(gameObj.name))
 
             if compress.lower().find('true') or compress.lower().find('yes'):
                 gameObj.compress(backUpPath)

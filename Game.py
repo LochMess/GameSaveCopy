@@ -6,6 +6,7 @@ from shutil import copytree, rmtree, make_archive
 import logging
 import re
 
+
 class Game:
     'Game object that represents game save locations.'
     Uplay = None
@@ -19,7 +20,8 @@ class Game:
         self.name = name
         self.relativePath = relPath.replace("/", "\\")
         self.absolutePath = self.buildAbsoluteFilePath()
-        self.installed = True if self.absolutePath and listdir(self.absolutePath) else False
+        self.installed = True if self.absolutePath and listdir(
+            self.absolutePath) else False
 
     def isCompleteFilePath(self):
         return True if re.search('[A-Z]:{1}', self.relativePath) else False
@@ -27,14 +29,11 @@ class Game:
     def isSavedInSteamApps(self):
         return True if self.relativePath.find('steamapps') != -1 else False
 
-
     def isSavedInUplay(self):
         return True if self.relativePath.find('Ubisoft Game Launcher') != -1 else False
 
-
     def isSavedInSteamUserdata(self):
         return True if self.relativePath.find('Steam/userdata') != -1 or self.relativePath.find('Steam\\userdata') != -1 else False
-
 
     def buildAbsoluteFilePath(self):
         if (self.isCompleteFilePath()):
@@ -42,14 +41,18 @@ class Game:
             if exists(path):
                 return path
         if (self.isSavedInUplay()):
-            self.relativePath = self.relativePath.replace('<UplayUserID>', Game.UplayUserID)
-            path = join(Game.UplayClientLocation[:Game.UplayClientLocation.find('Ubisoft Game Launcher')], self.relativePath).replace("/", "\\")
+            self.relativePath = self.relativePath.replace(
+                '<UplayUserID>', Game.UplayUserID)
+            path = join(Game.UplayClientLocation[:Game.UplayClientLocation.find(
+                'Ubisoft Game Launcher')], self.relativePath).replace("/", "\\")
             if exists(path):
                 return path
 
         elif (self.isSavedInSteamUserdata()):
-            self.relativePath = self.relativePath.replace('<SteamUserID>', Game.Steam['SteamUserID'])
-            path = join(Game.Steam['SteamClientLocation'][:Game.Steam['SteamClientLocation'].find('Steam')], self.relativePath).replace("/", "\\")
+            self.relativePath = self.relativePath.replace(
+                '<SteamUserID>', Game.Steam['SteamUserID'])
+            path = join(Game.Steam['SteamClientLocation'][:Game.Steam['SteamClientLocation'].find(
+                'Steam')], self.relativePath).replace("/", "\\")
             if exists(path):
                 return path
 
@@ -67,14 +70,16 @@ class Game:
 
     def hasNoBackups(self, backupLocation):
         mostRecentBackup = self.mostRecentBackupPath(backupLocation)
-        modDateMostRecent = self.getModificationDate(join(backupLocation, self.name, mostRecentBackup))
+        modDateMostRecent = self.getModificationDate(
+            join(backupLocation, self.name, mostRecentBackup))
         if not modDateMostRecent:
             return True
         return False
 
     def currentSaveBackedUp(self, backupPath):
         currentSave = self.getModificationDate(self.absolutePath)
-        latestBackup = self.getModificationDate(join(backupPath, self.name, self.mostRecentBackupPath(backupPath)))
+        latestBackup = self.getModificationDate(
+            join(backupPath, self.name, self.mostRecentBackupPath(backupPath)))
         if not currentSave or currentSave == latestBackup:
             return True
         return False
@@ -89,19 +94,20 @@ class Game:
 
             for name in files:
                 if (datetime.fromtimestamp(getmtime(join(root, name))) > mostRecentModification):
-                    mostRecentModification = datetime.fromtimestamp(getmtime(join(root, name)))
+                    mostRecentModification = datetime.fromtimestamp(
+                        getmtime(join(root, name)))
             for name in dirs:
                 if (datetime.fromtimestamp(getmtime(join(root, name))) > mostRecentModification):
-                    mostRecentModification = datetime.fromtimestamp(getmtime(join(root, name)))
-        return mostRecentModification if not errors else None 
-
+                    mostRecentModification = datetime.fromtimestamp(
+                        getmtime(join(root, name)))
+        return mostRecentModification if not errors else None
 
     def countBackups(self, backupLocation):
         try:
             return int(len(listdir(join(backupLocation, self.name))))
         except:
-            logging.info('There are no backups for {} to count.'.format(self.name))
-
+            logging.info(
+                'There are no backups for {} to count.'.format(self.name))
 
     def getBackupToDelete(self, backupLocation):
         oldestCreatedBackup = datetime.today()
@@ -112,7 +118,8 @@ class Game:
 
             for backup in backupDirectories:
                 backupFolderPath = join(backupLocation, self.name, backup)
-                backupModificationTime = datetime.fromtimestamp(getmtime(backupFolderPath))
+                backupModificationTime = datetime.fromtimestamp(
+                    getmtime(backupFolderPath))
 
                 if (backupModificationTime < oldestCreatedBackup):
                     backupToDelete = backupFolderPath
@@ -120,7 +127,8 @@ class Game:
 
             return backupToDelete
         except:
-            logging.info('There are no backups for {} to delete.'.format(self.name))
+            logging.info(
+                'There are no backups for {} to delete.'.format(self.name))
 
 # TODO shouldn't be a function on the game object
     def stripZipExtensionFromString(self, fileName):
@@ -140,23 +148,26 @@ class Game:
                 if (self.isZipFile(file)):
                     dateString = self.stripZipExtensionFromString(file)
                 try:
-                    dateFromString = datetime.strptime(dateString, "%Y-%m-%d %H.%M.%S")
+                    dateFromString = datetime.strptime(
+                        dateString, "%Y-%m-%d %H.%M.%S")
                     if (dateFromString > dateCursor):
                         mostRecentBackup = file
                         dateCursor = dateFromString
                 except:
-                    logging.info("Filename '{}' is not a date matching the expected format.".format(file))
+                    logging.info(
+                        "Filename '{}' is not a date matching the expected format.".format(file))
 
             return mostRecentBackup
         except:
-            logging.info('Backups for {} do not exist, a new directory will be created.'.format(self.name))
+            logging.info(
+                'Backups for {} do not exist, a new directory will be created.'.format(self.name))
             return ""
-
 
     def cleanOldBackups(self, backupLocation, backupVersionCount):
         if self.countBackups(backupLocation) > int(backupVersionCount):
             try:
-                logging.info("Removing oldest backup version for {}.".format(self.name))
+                logging.info(
+                    "Removing oldest backup version for {}.".format(self.name))
                 versionToDelete = self.getBackupToDelete(backupLocation)
 
                 if versionToDelete.find('.zip'):
@@ -164,27 +175,32 @@ class Game:
                 else:
                     rmtree(versionToDelete)
             except:
-                logging.warning("Error: Failed to delete oldest backup {}.".format(self.getBackupToDelete(backupLocation)))
-
+                logging.warning("Error: Failed to delete oldest backup {}.".format(
+                    self.getBackupToDelete(backupLocation)))
 
     def backup(self, backupLocation):
-        logging.info("Starting backup of {} saves at {}.".format(self.name, datetime.now()))
+        logging.info("Starting backup of {} saves at {}.".format(
+            self.name, datetime.now()))
         backupPath = join(backupLocation, self.name)
-        backupName = self.getModificationDate(self.absolutePath).strftime("%Y-%m-%d %H.%M.%S")
+        backupName = self.getModificationDate(
+            self.absolutePath).strftime("%Y-%m-%d %H.%M.%S")
         if not exists(backupPath):
             makedirs(backupPath)
         copytree(self.absolutePath, join(backupPath, backupName))
-        logging.info("Completed backup of {} saves at {}.".format(self.name, datetime.now()))
+        logging.info("Completed backup of {} saves at {}.".format(
+            self.name, datetime.now()))
 
     def compress(self, backupLocation):
         backupPath = join(backupLocation, self.name)
-        backups = list(filter(lambda file: file.find('.zip') == -1, listdir(backupPath)))
+        backups = list(filter(lambda file: file.find(
+            '.zip') == -1, listdir(backupPath)))
         if len(backups) > 1:
             logging.info("Compressing previous backups.")
             for backup in backups[:-1]:
                 currentBackupPath = join(backupPath, backup)
                 make_archive(currentBackupPath, 'zip', currentBackupPath)
-                logging.info("Removing uncompressed previous backup {}.".format(backup))
+                logging.info(
+                    "Removing uncompressed previous backup {}.".format(backup))
                 rmtree(currentBackupPath)
 
     def __str__(self):
