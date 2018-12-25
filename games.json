@@ -1,6 +1,10 @@
 {
     "games": [
         {
+            "name": "Far Cry 5",
+            "path": "Ubisoft Game Launcher/savegames/<UplayUserID>/1803"
+        },
+        {
             "name": "Tomb Raider 2013",
             "path": "Steam/userdata/<SteamUserID>/203160"
         },
