@@ -70,8 +70,7 @@ class Game:
 
     def hasNoBackups(self, backupLocation):
         mostRecentBackup = self.mostRecentBackupPath(backupLocation)
-        modDateMostRecent = self.getModificationDate(
-            join(backupLocation, self.name, mostRecentBackup))
+        modDateMostRecent = self.getModificationDate(join(backupLocation, self.name, mostRecentBackup))
         if not modDateMostRecent:
             return True
         return False
@@ -106,8 +105,7 @@ class Game:
         try:
             return int(len(listdir(join(backupLocation, self.name))))
         except:
-            logging.info(
-                'There are no backups for {} to count.'.format(self.name))
+            logging.info('There are no backups for {} to count.'.format(self.name))
 
     def getBackupToDelete(self, backupLocation):
         oldestCreatedBackup = datetime.today()
@@ -118,8 +116,8 @@ class Game:
 
             for backup in backupDirectories:
                 backupFolderPath = join(backupLocation, self.name, backup)
-                backupModificationTime = datetime.fromtimestamp(
-                    getmtime(backupFolderPath))
+                
+                backupModificationTime = self.filenameToDate(backup)
 
                 if (backupModificationTime < oldestCreatedBackup):
                     backupToDelete = backupFolderPath
@@ -138,36 +136,37 @@ class Game:
     def isZipFile(self, fileName):
         return fileName.find('.zip') != -1
 
+# TODO shouldn't be a function on the game object
+    def filenameToDate(self, filename):
+        dateString = filename 
+        if (self.isZipFile(dateString)):
+            dateString = self.stripZipExtensionFromString(dateString)
+        try:
+            return datetime.strptime(dateString, "%Y-%m-%d %H.%M.%S")
+        except:
+            logging.info("Filename '{}' is not a date matching the expected format.".format(filename))
+
     def mostRecentBackupPath(self, backupLocation):
         dateCursor = datetime(1901, 1, 1, 00, 00, 00, 00)
         mostRecentBackup = ""
 
         try:
             for file in listdir(join(backupLocation, self.name)):
-                dateString = file
-                if (self.isZipFile(file)):
-                    dateString = self.stripZipExtensionFromString(file)
-                try:
-                    dateFromString = datetime.strptime(
-                        dateString, "%Y-%m-%d %H.%M.%S")
-                    if (dateFromString > dateCursor):
-                        mostRecentBackup = file
-                        dateCursor = dateFromString
-                except:
-                    logging.info(
-                        "Filename '{}' is not a date matching the expected format.".format(file))
+
+                dateFromString = self.filenameToDate(file)
+                if (dateFromString > dateCursor):
+                    mostRecentBackup = file
+                    dateCursor = dateFromString
 
             return mostRecentBackup
         except:
-            logging.info(
-                'Backups for {} do not exist, a new directory will be created.'.format(self.name))
+            logging.info('Backups for {} do not exist, a new directory will be created.'.format(self.name))
             return ""
 
     def cleanOldBackups(self, backupLocation, backupVersionCount):
-        if self.countBackups(backupLocation) > int(backupVersionCount):
+        while self.countBackups(backupLocation) > int(backupVersionCount):
             try:
-                logging.info(
-                    "Removing oldest backup version for {}.".format(self.name))
+                logging.info("Removing oldest backup version for {}.".format(self.name))
                 versionToDelete = self.getBackupToDelete(backupLocation)
 
                 if versionToDelete.find('.zip'):

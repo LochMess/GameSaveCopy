@@ -73,8 +73,7 @@ if __name__ == '__main__':
                 gameObj.backup(backUpPath)
                 gameObj.cleanOldBackups(backUpPath, backupVersions)
             else:
-                logging.info(
-                    "No changes to save for {} to backup.".format(gameObj.name))
+                logging.info("No changes to save for {} to backup.".format(gameObj.name))
 
             if compress.lower().find('true') or compress.lower().find('yes'):
                 gameObj.compress(backUpPath)
