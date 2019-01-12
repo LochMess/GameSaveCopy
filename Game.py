@@ -77,8 +77,7 @@ class Game:
 
     def currentSaveBackedUp(self, backupPath):
         currentSave = self.getModificationDate(self.absolutePath)
-        latestBackup = self.getModificationDate(
-            join(backupPath, self.name, self.mostRecentBackupPath(backupPath)))
+        latestBackup = self.filenameToDate(self.mostRecentBackupPath(backupPath))
         if not currentSave or currentSave == latestBackup:
             return True
         return False
@@ -90,7 +89,6 @@ class Game:
         mostRecentModification = datetime(1901, 1, 1, 00, 00, 00, 00)
         errors = []
         for root, dirs, files in walk(folderToSearch, onerror=errors.append):
-
             for name in files:
                 if (datetime.fromtimestamp(getmtime(join(root, name))) > mostRecentModification):
                     mostRecentModification = datetime.fromtimestamp(
@@ -99,7 +97,7 @@ class Game:
                 if (datetime.fromtimestamp(getmtime(join(root, name))) > mostRecentModification):
                     mostRecentModification = datetime.fromtimestamp(
                         getmtime(join(root, name)))
-        return mostRecentModification if not errors else None
+        return mostRecentModification.replace(microsecond = 0) if not errors else None
 
     def countBackups(self, backupLocation):
         try:
