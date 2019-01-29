@@ -1,6 +1,10 @@
 {
     "games": [
         {
+            "name": "Metal Gear Solid V The Phantom Pain",
+            "path": "Steam/userdata/<SteamUserID>/311340"
+        },
+        {
             "name": "Far Cry 5",
             "path": "Ubisoft Game Launcher/savegames/<UplayUserID>/1803"
         },
