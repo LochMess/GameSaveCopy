@@ -167,7 +167,7 @@ class Game:
                 logging.info("Removing oldest backup version for {}.".format(self.name))
                 versionToDelete = self.getBackupToDelete(backupLocation)
 
-                if versionToDelete.find('.zip'):
+                if self.isZipFile(versionToDelete):
                     remove(versionToDelete)
                 else:
                     rmtree(versionToDelete)
