@@ -1,12 +1,56 @@
 {
     "games": [
         {
+            "name": "Trine 3 - The Artifacts of Power Steam Version",
+            "path": "Steam/userdata/<SteamUserID>/319910/remote"
+        },
+        {
+            "name": "Trine 2 Steam Version",
+            "path": "Steam/userdata/<SteamUserID>/35720/remote"
+        },
+        {
+            "name": "Trine",
+            "path": "steamapps/common/Trine/profiles"
+        },
+        {
+            "name": "Ghost Recon Wildlands",
+            "path": "Ubisoft Game Launcher/savegames/<UplayUserID>/2970"
+        },
+        {
+            "name": "Trails Evolution Gold Edition",
+            "path": "Ubisoft Game Launcher/savegames/<UplayUserID>/78"
+        },
+        {
+            "name": "SUPERHOT",
+            "path": "AppData/LocalLow/SUPERHOT_Team/SUPERHOT"
+        },
+        {
+            "name": "Sleeping Dogs",
+            "path": "steamapps/common/SleepingDogs/Data"
+        },
+        {
+            "name": "Just Cause 3",
+            "path": "Documents/Square Enix/Just Cause 3/Saves"
+        },
+        {
             "name": "Metal Gear Solid V The Phantom Pain",
             "path": "Steam/userdata/<SteamUserID>/311340"
         },
         {
             "name": "Far Cry 5",
             "path": "Ubisoft Game Launcher/savegames/<UplayUserID>/1803"
+        },
+        {
+            "name": "Far Cry 4",
+            "path": "Ubisoft Game Launcher/savegames/<UplayUserID>/420"
+        },
+        {
+            "name": "Far Cry 3 - Blood Dragon",
+            "path": "Ubisoft Game Launcher/savegames/<UplayUserID>/205"
+        },
+        {
+            "name": "Far Cry 3",
+            "path": "Ubisoft Game Launcher/savegames/<UplayUserID>/46"
         },
         {
             "name": "Tomb Raider 2013",
@@ -31,6 +75,10 @@
         {
             "name": "DOOM 2016",
             "path": "Saved Games/id Software/DOOM/base"
+        },
+        {
+            "name": "The Witcher 3",
+            "path": "Documents/The Witcher 3"
         },
         {
             "name": "The Witcher 2 Assassins of Kings Steam Cloud Saves",
@@ -85,8 +133,12 @@
             "path": "Saved Games/MachineGames/Wolfenstein II The New Colossus/base"
         },
         {
-            "name": "The Witcher 3",
-            "path": "Documents/The Witcher 3"
+            "name": "Wolfenstein The Old Blood",
+            "path": "Saved Games/MachineGames/Wolfenstein The Old Blood/base"
+        },
+        {
+            "name": "Wolfenstein The New Order",
+            "path": "Saved Games/MachineGames/Wolfenstein The New Order/base"
         },
         {
             "name": "The Elder Scrolls IV Skyrim",
@@ -97,8 +149,16 @@
             "path": "Documents/my games/Skyrim Special Edition"
         },
         {
+            "name": "Borderlands The Pre-Sequel",
+            "path": "Documents/my games/Borderlands The Pre-Sequel/WillowGame/SaveData"
+        },
+        {
             "name": "Borderlands 2",
             "path": "Documents/my games/borderlands 2/willowgame/savedata"
+        },
+        {
+            "name": "Borderlands",
+            "path": "Documents/my games/borderlands/savedata"
         }
     ]
 }
