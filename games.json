@@ -1,6 +1,14 @@
 {
     "games": [
         {
+            "name": "Mirrors Edge Catalyst",
+            "path": "Documents/Mirrors Edge Catalyst/settings"
+        },
+        {
+            "name": "Titanfall 2",
+            "path": "Documents/Respawn/Titanfall2"
+        },
+        {
             "name": "Trine 3 - The Artifacts of Power Steam Version",
             "path": "Steam/userdata/<SteamUserID>/319910/remote"
         },
