@@ -1,6 +1,10 @@
 {
     "games": [
         {
+            "name": "BioShock Infinite",
+            "path": "Steam/userdata/<SteamUserID>/8870/remote"
+        },
+        {
             "name": "Mass Effect 3",
             "path": "Documents/BioWare/Mass Effect 3/Save"
         },
